@@ -1,0 +1,8 @@
+/* Test file untuk memverifikasi Tailwind CSS */
+.test-tailwind {
+  @apply bg-red-500 text-white p-4 rounded;
+}
+
+.test-daisyui {
+  @apply btn btn-primary;
+}
