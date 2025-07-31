@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpressCoin Agent - GameFi Delivery Simulation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'fedex-purple': '#4B0082',
+                        'fedex-orange': '#FF6600',
+                        'fedex-light': '#6B46C1',
+                        'fedex-dark': '#3B0764'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-base-100">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-fedex-purple to-fedex-light">
+        <div class="card w-96 bg-base-100 shadow-2xl">
+            <div class="card-body items-center text-center">
+                <div class="w-20 h-20 bg-fedex-purple rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-shipping-fast text-3xl text-white"></i>
+                </div>
+                <h2 class="card-title text-2xl font-bold text-fedex-purple">ExpressCoin Agent</h2>
+                <p class="text-gray-600 mb-6">Platform GameFi untuk Agent Pengiriman Koin</p>
+                <button onclick="loginWithGoogle()" class="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none w-full">
+                    <i class="fab fa-google mr-2"></i>
+                    Login dengan Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Mobile Menu Button -->
+        <div class="navbar bg-base-100 shadow-lg lg:hidden">
+            <div class="flex-1">
+                <a class="btn btn-ghost text-xl text-fedex-purple">
+                    <i class="fas fa-shipping-fast mr-2"></i>ExpressCoin
+                </a>
+            </div>
+            <div class="flex-none">
+                <button onclick="toggleMobileMenu()" class="btn btn-square btn-ghost">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="drawer lg:drawer-open">
+            <input id="mobile-menu" type="checkbox" class="drawer-toggle" />
+            
+            <!-- Sidebar -->
+            <div class="drawer-side">
+                <label for="mobile-menu" class="drawer-overlay"></label>
+                <aside class="min-h-full w-80 bg-base-200">
+                    <!-- User Profile -->
+                    <div class="bg-gradient-to-r from-fedex-purple to-fedex-light p-6">
+                        <div class="flex items-center space-x-4">
+                            <div class="avatar">
+                                <div class="w-12 rounded-full ring ring-white ring-offset-2">
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" alt="User Avatar">
+                                </div>
+                            </div>
+                            <div class="text-white">
+                                <div class="font-bold">John Doe</div>
+                                <div class="text-sm opacity-75">Agent Level 3</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Menu -->
+                    <ul class="menu p-4 space-y-2">
+                        <li><a onclick="showPage('dashboard')" class="menu-item active" data-page="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>Dashboard
+                        </a></li>
+                        <li><a onclick="showPage('license')" class="menu-item" data-page="license">
+                            <i class="fas fa-certificate"></i>Lisensi
+                        </a></li>
+                        <li><a onclick="showPage('packages')" class="menu-item" data-page="packages">
+                            <i class="fas fa-box"></i>Paket
+                        </a></li>
+                        <li><a onclick="showPage('history')" class="menu-item" data-page="history">
+                            <i class="fas fa-history"></i>Histori
+                        </a></li>
+                        <li><a onclick="showPage('referral')" class="menu-item" data-page="referral">
+                            <i class="fas fa-users"></i>Referral
+                        </a></li>
+                        <li><a onclick="showPage('wallet')" class="menu-item" data-page="wallet">
+                            <i class="fas fa-wallet"></i>Wallet
+                        </a></li>
+                        <li class="mt-8"><a onclick="logout()" class="text-error">
+                            <i class="fas fa-sign-out-alt"></i>Logout
+                        </a></li>
+                    </ul>
+                </aside>
+            </div>
+
+            <!-- Main Content -->
+            <div class="drawer-content flex flex-col">
+                <main class="flex-1 p-6">
+                    <!-- Dashboard Page -->
+                    <div id="dashboard" class="page">
+                        <div class="mb-6">
+                            <h1 class="text-3xl font-bold text-fedex-purple">Dashboard</h1>
+                            <p class="text-gray-600">Ringkasan aktivitas agent Anda</p>
+                        </div>
+
+                        <!-- Stats Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="stat bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg">
+                                <div class="stat-figure text-white">
+                                    <i class="fas fa-dollar-sign text-2xl"></i>
+                                </div>
+                                <div class="stat-title text-green-100">Saldo USDT</div>
+                                <div class="stat-value">$2,450.75</div>
+                            </div>
+                            
+                            <div class="stat bg-gradient-to-r from-fedex-purple to-fedex-light text-white rounded-lg shadow-lg">
+                                <div class="stat-figure text-white">
+                                    <i class="fas fa-certificate text-2xl"></i>
+                                </div>
+                                <div class="stat-title text-purple-100">Lisensi Aktif</div>
+                                <div class="stat-value">3</div>
+                            </div>
+
+                            <div class="stat bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-lg">
+                                <div class="stat-figure text-white">
+                                    <i class="fas fa-users text-2xl"></i>
+                                </div>
+                                <div class="stat-title text-blue-100">Total Referral</div>
+                                <div class="stat-value">47</div>
+                            </div>
+
+                            <div class="stat bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow-lg">
+                                <div class="stat-figure text-white">
+                                    <i class="fas fa-box text-2xl"></i>
+                                </div>
+                                <div class="stat-title text-orange-100">Paket Dikirim</div>
+                                <div class="stat-value">156</div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Stats -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Package Status -->
+                            <div class="card bg-base-100 shadow-lg">
+                                <div class="card-body">
+                                    <h3 class="card-title text-fedex-purple">Status Paket</h3>
+                                    <div class="grid grid-cols-2 gap-4 mt-4">
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-yellow-600">23</div>
+                                            <div class="text-sm text-gray-600">Belum Dikirim</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-green-600">156</div>
+                                            <div class="text-sm text-gray-600">Sudah Dikirim</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Commission Stats -->
+                            <div class="card bg-base-100 shadow-lg">
+                                <div class="card-body">
+                                    <h3 class="card-title text-fedex-purple">Komisi</h3>
+                                    <div class="grid grid-cols-2 gap-4 mt-4">
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-green-600">$845.32</div>
+                                            <div class="text-sm text-gray-600">Terkumpul</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-yellow-600">$234.18</div>
+                                            <div class="text-sm text-gray-600">Pending</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Referral Rewards -->
+                        <div class="card bg-base-100 shadow-lg mt-6">
+                            <div class="card-body">
+                                <h3 class="card-title text-fedex-purple">Reward Referral</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                    <div class="text-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                                        <div class="text-lg font-bold text-blue-600">Level 1</div>
+                                        <div class="text-2xl font-bold text-blue-800">$342.50</div>
+                                        <div class="text-sm text-blue-600">15 Referrals</div>
+                                    </div>
+                                    <div class="text-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                                        <div class="text-lg font-bold text-purple-600">Level 2</div>
+                                        <div class="text-2xl font-bold text-purple-800">$198.25</div>
+                                        <div class="text-sm text-purple-600">22 Referrals</div>
+                                    </div>
+                                    <div class="text-center p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                                        <div class="text-lg font-bold text-green-600">Level 3</div>
+                                        <div class="text-2xl font-bold text-green-800">$89.75</div>
+                                        <div class="text-sm text-green-600">10 Referrals</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- License Page -->
+                    <div id="license" class="page hidden">
+                        <div class="mb-6">
+                            <h1 class="text-3xl font-bold text-fedex-purple">Lisensi Agent</h1>
+                            <p class="text-gray-600">Pilih lisensi yang sesuai dengan kebutuhan Anda</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Basic License -->
+                            <div class="card bg-base-100 shadow-lg border-2 border-gray-200">
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <i class="fas fa-star text-2xl text-blue-600"></i>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-blue-600">Basic Agent</h3>
+                                        <div class="text-3xl font-bold my-4">$50 USDT</div>
+                                        <ul class="text-left space-y-2 text-sm">
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>5 Paket per hari</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Komisi 3%</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Referral Level 1</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Support 24/7</li>
+                                        </ul>
+                                        <button class="btn btn-primary bg-blue-600 hover:bg-blue-700 border-none w-full mt-4">
+                                            Beli Lisensi
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Premium License -->
+                            <div class="card bg-base-100 shadow-lg border-2 border-fedex-purple">
+                                <div class="badge badge-secondary absolute top-4 right-4">Popular</div>
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <i class="fas fa-crown text-2xl text-fedex-purple"></i>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-fedex-purple">Premium Agent</h3>
+                                        <div class="text-3xl font-bold my-4">$150 USDT</div>
+                                        <ul class="text-left space-y-2 text-sm">
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>15 Paket per hari</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Komisi 5%</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Referral Level 1-2</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Priority Support</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Bonus Mingguan</li>
+                                        </ul>
+                                        <button class="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none w-full mt-4">
+                                            Beli Lisensi
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- VIP License -->
+                            <div class="card bg-base-100 shadow-lg border-2 border-yellow-400">
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <i class="fas fa-gem text-2xl text-yellow-600"></i>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-yellow-600">VIP Agent</h3>
+                                        <div class="text-3xl font-bold my-4">$500 USDT</div>
+                                        <ul class="text-left space-y-2 text-sm">
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Unlimited Paket</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Komisi 8%</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Referral Level 1-3</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>VIP Support</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>Bonus Bulanan</li>
+                                            <li><i class="fas fa-check text-green-500 mr-2"></i>NFT Exclusive</li>
+                                        </ul>
+                                        <button class="btn btn-primary bg-yellow-600 hover:bg-yellow-700 border-none w-full mt-4">
+                                            Beli Lisensi
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Packages Page -->
+                    <div id="packages" class="page hidden">
+                        <div class="mb-6">
+                            <h1 class="text-3xl font-bold text-fedex-purple">Paket Tersedia</h1>
+                            <p class="text-gray-600">Pilih paket yang siap untuk dikirim</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <!-- Package Card 1 -->
+                            <div class="card bg-base-100 shadow-lg">
+                                <div class="card-body">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="badge badge-success">Siap Kirim</div>
+                                        <div class="text-right">
+                                            <div class="text-2xl font-bold text-green-600">$25.50</div>
+                                            <div class="text-sm text-gray-600">Komisi</div>
+                                        </div>
+                                    </div>
+                                    <h3 class="font-bold text-lg">PKG-001-2024</h3>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Asal:</span>
+                                            <span>Jakarta, Indonesia</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Tujuan:</span>
+                                            <span>Singapore</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Berat:</span>
+                                            <span>2.5 kg</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Deadline:</span>
+                                            <span class="text-red-600">2 hari</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none w-full mt-4">
+                                        <i class="fas fa-truck mr-2"></i>Ambil Paket
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Package Card 2 -->
+                            <div class="card bg-base-100 shadow-lg">
+                                <div class="card-body">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="badge badge-warning">Priority</div>
+                                        <div class="text-right">
+                                            <div class="text-2xl font-bold text-green-600">$45.75</div>
+                                            <div class="text-sm text-gray-600">Komisi</div>
+                                        </div>
+                                    </div>
+                                    <h3 class="font-bold text-lg">PKG-002-2024</h3>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Asal:</span>
+                                            <span>Surabaya, Indonesia</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Tujuan:</span>
+                                            <span>Hong Kong</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Berat:</span>
+                                            <span>5.0 kg</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Deadline:</span>
+                                            <span class="text-orange-600">1 hari</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none w-full mt-4">
+                                        <i class="fas fa-truck mr-2"></i>Ambil Paket
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Package Card 3 -->
+                            <div class="card bg-base-100 shadow-lg">
+                                <div class="card-body">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="badge badge-info">Express</div>
+                                        <div class="text-right">
+                                            <div class="text-2xl font-bold text-green-600">$62.30</div>
+                                            <div class="text-sm text-gray-600">Komisi</div>
+                                        </div>
+                                    </div>
+                                    <h3 class="font-bold text-lg">PKG-003-2024</h3>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Asal:</span>
+                                            <span>Bandung, Indonesia</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Tujuan:</span>
+                                            <span>Tokyo, Japan</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Berat:</span>
+                                            <span>1.8 kg</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Deadline:</span>
+                                            <span class="text-green-600">3 hari</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none w-full mt-4">
+                                        <i class="fas fa-truck mr-2"></i>Ambil Paket
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Page -->
+                    <div id="history" class="page hidden">
+                        <div class="mb-6">
+                            <h1 class="text-3xl font-bold text-fedex-purple">Histori Pengiriman</h1>
+                            <p class="text-gray-600">Riwayat paket yang telah Anda tangani</p>
+                        </div>
+
+                        <div class="tabs tabs-boxed bg-base-200 mb-6">
+                            <a class="tab tab-active" onclick="showHistoryTab('all')">Semua</a>
+                            <a class="tab" onclick="showHistoryTab('delivered')">Terkirim</a>
+                            <a class="tab" onclick="showHistoryTab('in-transit')">Dalam Perjalanan</a>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="table table-zebra w-full">
+                                <thead>
+                                    <tr>
+                                        <th>ID Paket</th>
+                                        <th>Rute</th>
+                                        <th>Status</th>
+                                        <th>Tanggal</th>
+                                        <th>Komisi</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>PKG-156-2024</td>
+                                        <td>Jakarta → Singapore</td>
+                                        <td><span class="badge badge-success">Terkirim</span></td>
+                                        <td>2024-01-15</td>
+                                        <td class="text-green-600 font-bold">$28.50</td>
+                                        <td>
+                                            <button class="btn btn-xs btn-ghost">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>PKG-155-2024</td>
+                                        <td>Surabaya → Hong Kong</td>
+                                        <td><span class="badge badge-warning">Transit</span></td>
+                                        <td>2024-01-14</td>
+                                        <td class="text-yellow-600 font-bold">$42.00</td>
+                                        <td>
+                                            <button class="btn btn-xs btn-ghost">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>PKG-154-2024</td>
+                                        <td>Bandung → Tokyo</td>
+                                        <td><span class="badge badge-success">Terkirim</span></td>
+                                        <td>2024-01-13</td>
+                                        <td class="text-green-600 font-bold">$55.75</td>
+                                        <td>
+                                            <button class="btn btn-xs btn-ghost">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>PKG-153-2024</td>
+                                        <td>Jakarta → Malaysia</td>
+                                        <td><span class="badge badge-info">Pickup</span></td>
+                                        <td>2024-01-12</td>
+                                        <td class="text-blue-600 font-bold">$19.25</td>
+                                        <td>
+                                            <button class="btn btn-xs btn-ghost">
+                                                <i class="fas fa-route"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Referral Page -->
+                    <div id="referral" class="page hidden">
+                        <div class="mb-6">
+                            <h1 class="text-3xl font-bold text-fedex-purple">Program Referral</h1>
+                            <p class="text-gray-600">Kelola jaringan referral Anda</p>
+                        </div>
+
+                        <!-- Referral Link -->
+                        <div class="card bg-base-100 shadow-lg mb-6">
+                            <div class="card-body">
+                                <h3 class="card-title text-fedex-purple">Link Referral Anda</h3>
+                                <div class="flex flex-col md:flex-row gap-4 mt-4">
+                                    <input type="text" class="input input-bordered flex-1 text-base" value="https://expresscoin.app/ref/AGENT123" readonly>
+                                    <button class="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none">
+                                        <i class="fas fa-copy mr-2"></i>Copy Link
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Referral Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="card bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg">
+                                <div class="card-body text-center">
+                                    <div class="text-3xl font-bold">15</div>
+                                    <div class="text-blue-100">Level 1</div>
+                                    <div class="text-sm text-blue-200">Komisi: 5%</div>
+                                </div>
+                            </div>
+                            <div class="card bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg">
+                                <div class="card-body text-center">
+                                    <div class="text-3xl font-bold">22</div>
+                                    <div class="text-purple-100">Level 2</div>
+                                    <div class="text-sm text-purple-200">Komisi: 3%</div>
+                                </div>
+                            </div>
+                            <div class="card bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg">
+                                <div class="card-body text-center">
+                                    <div class="text-3xl font-bold">10</div>
+                                    <div class="text-green-100">Level 3</div>
+                                    <div class="text-sm text-green-200">Komisi: 1%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Referral List -->
+                        <div class="card bg-base-100 shadow-lg">
+                            <div class="card-body">
+                                <h3 class="card-title text-fedex-purple">Daftar Referral</h3>
+                                <div class="overflow-x-auto mt-4">
+                                    <table class="table table-zebra w-full">
+                                        <thead>
+                                            <tr>
+                                                <th>Username</th>
+                                                <th>Level</th>
+                                                <th>Tanggal Join</th>
+                                                <th>Total Komisi</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="avatar">
+                                                            <div class="w-8 h-8 rounded-full">
+                                                                <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face">
+                                                            </div>
+                                                        </div>
+                                                        <span>sarah_wilson</span>
+                                                    </div>
+                                                </td>
+                                                <td><span class="badge badge-info">Level 1</span></td>
+                                                <td>2024-01-10</td>
+                                                <td class="text-green-600 font-bold">$125.30</td>
+                                                <td><span class="badge badge-success">Aktif</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="avatar">
+                                                            <div class="w-8 h-8 rounded-full">
+                                                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face">
+                                                            </div>
+                                                        </div>
+                                                        <span>mike_chen</span>
+                                                    </div>
+                                                </td>
+                                                <td><span class="badge badge-secondary">Level 2</span></td>
+                                                <td>2024-01-08</td>
+                                                <td class="text-green-600 font-bold">$89.75</td>
+                                                <td><span class="badge badge-success">Aktif</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="avatar">
+                                                            <div class="w-8 h-8 rounded-full">
+                                                                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face">
+                                                            </div>
+                                                        </div>
+                                                        <span>anna_kim</span>
+                                                    </div>
+                                                </td>
+                                                <td><span class="badge badge-accent">Level 3</span></td>
+                                                <td>2024-01-05</td>
+                                                <td class="text-green-600 font-bold">$34.50</td>
+                                                <td><span class="badge badge-warning">Pending</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wallet Page -->
+                    <div id="wallet" class="page hidden">
+                        <div class="mb-6">
+                            <h1 class="text-3xl font-bold text-fedex-purple">Wallet</h1>
+                            <p class="text-gray-600">Kelola aset crypto Anda</p>
+                        </div>
+
+                        <!-- Wallet Address -->
+                        <div class="card bg-base-100 shadow-lg mb-6">
+                            <div class="card-body">
+                                <h3 class="card-title text-fedex-purple">Alamat Wallet</h3>
+                                <div class="flex flex-col md:flex-row gap-4 mt-4">
+                                    <input type="text" class="input input-bordered flex-1 text-base" value="0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c" readonly>
+                                    <button class="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none">
+                                        <i class="fas fa-copy mr-2"></i>Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Balance Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="card bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-lg">
+                                <div class="card-body">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-lg font-bold text-yellow-100">BNB Balance</h3>
+                                            <div class="text-3xl font-bold">2.45 BNB</div>
+                                            <div class="text-yellow-200">≈ $890.25 USD</div>
+                                        </div>
+                                        <div class="text-4xl text-yellow-200">
+                                            <i class="fab fa-bitcoin"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg">
+                                <div class="card-body">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-lg font-bold text-green-100">USDT Balance</h3>
+                                            <div class="text-3xl font-bold">2,450.75 USDT</div>
+                                            <div class="text-green-200">Stablecoin</div>
+                                        </div>
+                                        <div class="text-4xl text-green-200">
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Send/Receive Buttons -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <button onclick="showSendModal()" class="btn btn-lg bg-fedex-purple hover:bg-fedex-dark text-white border-none">
+                                <i class="fas fa-paper-plane mr-2"></i>Kirim
+                            </button>
+                            <button onclick="showReceiveModal()" class="btn btn-lg btn-outline btn-primary">
+                                <i class="fas fa-download mr-2"></i>Terima
+                            </button>
+                        </div>
+
+                        <!-- Transaction History -->
+                        <div class="card bg-base-100 shadow-lg">
+                            <div class="card-body">
+                                <h3 class="card-title text-fedex-purple">Histori Transaksi</h3>
+                                <div class="overflow-x-auto mt-4">
+                                    <table class="table table-zebra w-full">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Asset</th>
+                                                <th>Amount</th>
+                                                <th>From/To</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><span class="badge badge-success">Receive</span></td>
+                                                <td>USDT</td>
+                                                <td class="text-green-600 font-bold">+250.00</td>
+                                                <td>0x1234...5678</td>
+                                                <td>2024-01-15</td>
+                                                <td><span class="badge badge-success">Confirmed</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><span class="badge badge-error">Send</span></td>
+                                                <td>BNB</td>
+                                                <td class="text-red-600 font-bold">-0.5</td>
+                                                <td>0x9876...4321</td>
+                                                <td>2024-01-14</td>
+                                                <td><span class="badge badge-success">Confirmed</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><span class="badge badge-success">Receive</span></td>
+                                                <td>USDT</td>
+                                                <td class="text-green-600 font-bold">+125.50</td>
+                                                <td>Commission</td>
+                                                <td>2024-01-13</td>
+                                                <td><span class="badge badge-success">Confirmed</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Modal -->
+    <dialog id="sendModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg text-fedex-purple">Kirim Crypto</h3>
+            <div class="py-4">
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Pilih Asset</span>
+                    </label>
+                    <select class="select select-bordered w-full text-base">
+                        <option>USDT</option>
+                        <option>BNB</option>
+                    </select>
+                </div>
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Alamat Tujuan</span>
+                    </label>
+                    <input type="text" class="input input-bordered w-full text-base" placeholder="0x...">
+                </div>
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Jumlah</span>
+                    </label>
+                    <input type="number" class="input input-bordered w-full text-base" placeholder="0.00">
+                </div>
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none">Kirim</button>
+                <form method="dialog">
+                    <button class="btn">Batal</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Receive Modal -->
+    <dialog id="receiveModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg text-fedex-purple">Terima Crypto</h3>
+            <div class="py-4 text-center">
+                <div class="w-48 h-48 bg-gray-200 mx-auto mb-4 flex items-center justify-center rounded-lg">
+                    <i class="fas fa-qrcode text-6xl text-gray-400"></i>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">Scan QR Code atau gunakan alamat wallet di bawah</p>
+                <div class="bg-base-200 p-4 rounded-lg">
+                    <div class="text-xs break-all">0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c</div>
+                </div>
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none">Copy Address</button>
+                <form method="dialog">
+                    <button class="btn">Tutup</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+    <script>
+        // Dark mode support
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            document.documentElement.setAttribute('data-theme', event.matches ? 'dark' : 'light');
+        });
+
+        // Login function
+        function loginWithGoogle() {
+            // Mock login - in real app this would integrate with Google OAuth
+            setTimeout(() => {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                showPage('dashboard');
+            }, 1000);
+        }
+
+        // Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            // Update menu active state
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+            
+            // Close mobile menu
+            document.getElementById('mobile-menu').checked = false;
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').checked = !document.getElementById('mobile-menu').checked;
+        }
+
+        function showHistoryTab(tab) {
+            // Update tab active state
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-active'));
+            event.target.classList.add('tab-active');
+            
+            // Filter table rows based on tab
+            // Implementation would filter the table rows based on status
+        }
+
+        function showSendModal() {
+            document.getElementById('sendModal').showModal();
+        }
+
+        function showReceiveModal() {
+            document.getElementById('receiveModal').showModal();
+        }
+
+        function logout() {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show login screen by default
+        });
+    </script>
+</body>
+              </html>
