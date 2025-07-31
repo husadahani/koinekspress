@@ -4,10 +4,238 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ExpressCoin Agent - GameFi Delivery Simulation</title>
+    
+    <!-- Fallback CSS untuk memastikan styling tetap berfungsi -->
+    <style>
+        /* Reset dan base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1f2937;
+        }
+        
+        /* FedEx colors */
+        .fedex-purple { color: #4B0082; }
+        .fedex-orange { color: #FF6600; }
+        .fedex-light { color: #6B46C1; }
+        .fedex-dark { color: #3B0764; }
+        
+        .bg-fedex-purple { background-color: #4B0082; }
+        .bg-fedex-orange { background-color: #FF6600; }
+        .bg-fedex-light { background-color: #6B46C1; }
+        .bg-fedex-dark { background-color: #3B0764; }
+        
+        /* Gradient backgrounds */
+        .bg-gradient-to-br {
+            background: linear-gradient(to bottom right, #4B0082, #6B46C1);
+        }
+        
+        .bg-gradient-to-r {
+            background: linear-gradient(to right, #4B0082, #6B46C1);
+        }
+        
+        /* Layout utilities */
+        .min-h-screen { min-height: 100vh; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .hidden { display: none; }
+        .w-full { width: 100%; }
+        .w-96 { width: 24rem; }
+        .h-20 { height: 5rem; }
+        .w-20 { width: 5rem; }
+        
+        /* Card styles */
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 2rem;
+        }
+        
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        /* Button styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #4B0082;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3B0764;
+        }
+        
+        /* Text styles */
+        .text-white { color: white; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .font-bold { font-weight: 700; }
+        .text-center { text-align: center; }
+        
+        /* Spacing */
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        
+        /* Rounded */
+        .rounded-full { border-radius: 9999px; }
+        
+        /* Icon styles */
+        .fas, .fab {
+            font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands';
+            font-weight: 900;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .w-96 { width: 90%; }
+        }
+        
+        /* DaisyUI Component Fallbacks */
+        .bg-base-100 { background-color: #ffffff; }
+        .bg-base-200 { background-color: #f1f5f9; }
+        .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        
+        /* Navbar styles */
+        .navbar {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background-color: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .flex-1 { flex: 1 1 0%; }
+        .flex-none { flex: none; }
+        
+        /* Drawer styles */
+        .drawer {
+            position: relative;
+        }
+        
+        .drawer-side {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 20rem;
+            background-color: #f1f5f9;
+            z-index: 40;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .drawer-open .drawer-side {
+            transform: translateX(0);
+        }
+        
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 30;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .drawer-toggle:checked ~ .drawer-side {
+            transform: translateX(0);
+        }
+        
+        .drawer-toggle:checked ~ .drawer-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Menu styles */
+        .menu {
+            list-style: none;
+        }
+        
+        .menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+        
+        .menu li a:hover {
+            background-color: #e5e7eb;
+        }
+        
+        .menu li a.active {
+            background-color: #4B0082;
+            color: white;
+        }
+        
+        /* Avatar styles */
+        .avatar {
+            position: relative;
+        }
+        
+        .w-12 { width: 3rem; }
+        .ring { box-shadow: 0 0 0 2px white; }
+        .ring-offset-2 { box-shadow: 0 0 0 2px white, 0 0 0 4px #e5e7eb; }
+        
+        /* Text utilities */
+        .text-xl { font-size: 1.25rem; }
+        .text-sm { font-size: 0.875rem; }
+        .opacity-75 { opacity: 0.75; }
+        
+        /* Spacing utilities */
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .space-x-4 > * + * { margin-left: 1rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        
+        /* Responsive utilities */
+        .lg\:hidden { display: none; }
+        .lg\:drawer-open .drawer-side { transform: translateX(0); }
+        
+        @media (min-width: 1024px) {
+            .lg\:hidden { display: block; }
+            .lg\:drawer-open .drawer-side { transform: translateX(0); }
+        }
+    </style>
+    
+    <!-- CDN CSS dengan fallback -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
