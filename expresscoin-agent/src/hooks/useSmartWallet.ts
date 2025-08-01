@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { createSmartAccount } from '../lib/alchemy';
-import { LocalAccountSigner } from '@alchemy/aa-core';
-import { privateKeyFromUid } from '../lib/privateKeyFromUid';
 
 // Use any type to avoid Alchemy SDK type conflicts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,18 +34,13 @@ export const useSmartWallet = () => {
     try {
       setWalletState(prev => ({ ...prev, loading: true, error: null }));
       
-      // Generate private key from Firebase UID
-      const privateKey = privateKeyFromUid(user.uid);
-      console.log('Generated private key from UID:', user.uid);
-      
-      // Create signer from private key
-      const signer = LocalAccountSigner.privateKeyToAccountSigner(privateKey);
-      
-      // Create smart account
-      const account = await createSmartAccount(signer);
+      // Create smart account provider using Account Kit
+      const account = await createSmartAccount(user.uid);
+      console.log('Created smart wallet for UID:', user.uid);
       
       // Get account address
-      const address = await account.getAddress();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const address = await (account as any).getAddress();
       
       setWalletState({
         account,

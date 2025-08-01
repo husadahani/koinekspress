@@ -1,4 +1,3 @@
-import { Alchemy, Network } from 'alchemy-sdk';
 import { 
   createLightAccountAlchemyProvider
 } from '@alchemy/aa-alchemy';
@@ -9,14 +8,7 @@ import {
 } from 'viem';
 import { bsc } from 'viem/chains';
 
-// Alchemy configuration for BNB MAINNET
-export const alchemyConfig = {
-  apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-  network: Network.BSC_MAINNET, // BNB MAINNET
-};
 
-// Initialize Alchemy SDK
-export const alchemy = new Alchemy(alchemyConfig);
 
 // BNB MAINNET chain configuration
 export const bnbChain = {
@@ -50,9 +42,17 @@ export const createWalletClientConfig = (account: unknown) => {
 // Gas Manager Policy ID (replace with your actual policy ID)
 export const GAS_MANAGER_POLICY_ID = process.env.NEXT_PUBLIC_GAS_MANAGER_POLICY_ID || "your-gas-manager-policy-id";
 
-// Smart Account creation helper
-export const createSmartAccount = async (signer: unknown) => {
+// Smart Account creation helper for BNB Mainnet
+export const createSmartAccount = async (uid: string) => {
   try {
+    const { privateKeyFromUid } = await import('./privateKeyFromUid');
+    const { LocalAccountSigner } = await import('@alchemy/aa-core');
+    
+    // Create signer from UID
+    const privateKey = privateKeyFromUid(uid);
+    const signer = LocalAccountSigner.privateKeyToAccountSigner(privateKey);
+    
+    // Create smart account provider
     const provider = createLightAccountAlchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || '',
       chain: bnbChain,
@@ -65,25 +65,6 @@ export const createSmartAccount = async (signer: unknown) => {
     return provider;
   } catch (error) {
     console.error('Error creating smart account:', error);
-    throw error;
-  }
-};
-
-// Modular Account creation helper (alternative)
-export const createModularSmartAccount = async (signer: unknown) => {
-  try {
-    const provider = createLightAccountAlchemyProvider({
-      apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || '',
-      chain: bnbChain,
-      signer,
-      gasManagerConfig: {
-        policyId: GAS_MANAGER_POLICY_ID,
-      },
-    });
-    
-    return provider;
-  } catch (error) {
-    console.error('Error creating modular smart account:', error);
     throw error;
   }
 };
