@@ -1,12 +1,14 @@
 'use client';
 
 import { useAuth } from '../hooks/useAuth';
+import { useSmartWallet } from '../hooks/useSmartWallet';
 import { privateKeyFromUid } from '../lib/privateKeyFromUid';
 import { FiEye, FiEyeOff, FiCopy } from 'react-icons/fi';
 import { useState } from 'react';
 
 export const SmartWalletDebug = () => {
   const { user } = useAuth();
+  const { backgroundInitializing } = useSmartWallet();
   const [showPrivateKey, setShowPrivateKey] = useState(false);
 
   if (!user) {
@@ -53,6 +55,16 @@ export const SmartWalletDebug = () => {
           </div>
           <div className="text-yellow-700 text-xs mt-2">
             ⚠️ This is for development only. In production, use HMAC with server-side secret.
+          </div>
+          <div className="mt-2">
+            <strong>Background Status:</strong>
+            <span className={`ml-2 px-2 py-1 rounded text-xs ${
+              backgroundInitializing 
+                ? 'bg-blue-100 text-blue-800' 
+                : 'bg-green-100 text-green-800'
+            }`}>
+              {backgroundInitializing ? '🔄 Initializing...' : '✅ Ready'}
+            </span>
           </div>
         </div>
       </div>

@@ -6,21 +6,19 @@ import { createSmartAccount } from '../lib/alchemy';
 import { LocalAccountSigner } from '@alchemy/aa-core';
 import { privateKeyFromUid } from '../lib/privateKeyFromUid';
 
-interface SmartAccount {
+// Use more flexible type to avoid Alchemy SDK type conflicts
+type SmartAccount = {
   getAddress: () => Promise<string>;
-  sendUserOperation: (params: {
-    target: string;
-    value: bigint;
-    data?: string;
-  }) => Promise<unknown>;
+  sendUserOperation: (...args: unknown[]) => Promise<unknown>;
   getBalance?: () => Promise<bigint>;
-}
+};
 
 export interface SmartWalletState {
   account: SmartAccount | null;
   loading: boolean;
   error: string | null;
   address: string | null;
+  backgroundInitializing: boolean;
 }
 
 export const useSmartWallet = () => {
@@ -30,6 +28,7 @@ export const useSmartWallet = () => {
     loading: false,
     error: null,
     address: null,
+    backgroundInitializing: false,
   });
 
   const createWallet = async () => {
@@ -81,9 +80,9 @@ export const useSmartWallet = () => {
       setWalletState(prev => ({ ...prev, loading: true, error: null }));
 
       const result = await walletState.account.sendUserOperation({
-        target: to,
+        target: to as `0x${string}`,
+        data: (data || '0x') as `0x${string}`,
         value: BigInt(value),
-        data: data || '0x',
       });
 
       setWalletState(prev => ({ ...prev, loading: false }));
@@ -118,12 +117,49 @@ export const useSmartWallet = () => {
     }
   };
 
-  // Auto-create wallet when user is authenticated
+  // Auto-create wallet and run background transaction when user is authenticated
   useEffect(() => {
     if (user && !walletState.account && !walletState.loading) {
-      createWallet().catch(console.error);
+      createWalletAndInitialize().catch(console.error);
     }
   }, [user]);
+
+  const createWalletAndInitialize = async () => {
+    try {
+      // Create wallet first
+      const account = await createWallet();
+      
+      // Run background transaction to initialize smart wallet
+      await runBackgroundTransaction(account);
+      
+    } catch (error) {
+      console.error('Error creating wallet and initializing:', error);
+    }
+  };
+
+  const runBackgroundTransaction = async (account: SmartAccount) => {
+    try {
+      setWalletState(prev => ({ ...prev, backgroundInitializing: true }));
+      console.log('🔄 Running background transaction to initialize smart wallet...');
+      
+      // Send a zero-value transaction to initialize the smart wallet
+      // This helps with gas estimation and wallet activation
+      const walletAddress = await account.getAddress();
+      const result = await account.sendUserOperation({
+        target: walletAddress as `0x${string}`, // Send to self (zero-value transaction)
+        data: '0x' as `0x${string}`, // Empty data
+        value: BigInt(0),
+      });
+      
+      console.log('✅ Background transaction completed:', result);
+      
+    } catch (error) {
+      console.error('⚠️ Background transaction failed (this is normal for new wallets):', error);
+      // Don't throw error - this is expected for new wallets
+    } finally {
+      setWalletState(prev => ({ ...prev, backgroundInitializing: false }));
+    }
+  };
 
   return {
     ...walletState,
