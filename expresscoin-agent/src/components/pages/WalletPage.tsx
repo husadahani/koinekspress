@@ -1,227 +1,217 @@
 'use client';
 
 import { useState } from 'react';
-import { FaBitcoin, FaDollarSign, FaPaperPlane, FaDownload, FaCopy, FaQrcode } from 'react-icons/fa';
-import { motion } from 'framer-motion';
-import { mockWalletBalances, mockTransactions } from '@/data/mockData';
+import { useAuth } from '../../hooks/useAuth';
+import { useSmartWallet } from '../../hooks/useSmartWallet';
+import { FiSend, FiDownload, FiCopy, FiCheck } from 'react-icons/fi';
 
-export default function WalletPage() {
+const WalletPage = () => {
+  const { user } = useAuth();
+  const { account, address, loading: walletLoading, error: walletError, sendToken } = useSmartWallet();
+  
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
+  const [sendAmount, setSendAmount] = useState('');
+  const [sendTo, setSendTo] = useState('');
+  const [selectedToken, setSelectedToken] = useState('BNB');
+  const [copied, setCopied] = useState(false);
+  const [sending, setSending] = useState(false);
 
-  const copyWalletAddress = () => {
-    navigator.clipboard.writeText('0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c');
-    // In a real app, you'd show a toast notification here
+  const tokens = [
+    { symbol: 'BNB', name: 'BNB', address: '0x0000000000000000000000000000000000000000' },
+    { symbol: 'USDT', name: 'Tether USD', address: '0x55d398326f99059fF775485246999027B3197955' },
+    { symbol: 'BUSD', name: 'Binance USD', address: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56' },
+    { symbol: 'USDC', name: 'USD Coin', address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d' },
+  ];
+
+  const handleSend = async () => {
+    if (!sendTo || !sendAmount) return;
+    
+    try {
+      setSending(true);
+      await sendToken(sendTo, sendAmount, selectedToken);
+      setShowSendModal(false);
+      setSendAmount('');
+      setSendTo('');
+    } catch (error) {
+      console.error('Send error:', error);
+    } finally {
+      setSending(false);
+    }
   };
 
-  const getBadgeClass = (type: string) => {
-    return type === 'receive' ? 'badge-success' : 'badge-error';
+  const copyAddress = async () => {
+    if (address) {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
-  const getBadgeText = (type: string) => {
-    return type === 'receive' ? 'Receive' : 'Send';
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
-  const getAmountColor = (type: string) => {
-    return type === 'receive' ? 'text-green-600' : 'text-red-600';
-  };
-
-  const getAmountPrefix = (type: string) => {
-    return type === 'receive' ? '+' : '-';
-  };
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Please Login First</h2>
+          <p className="text-gray-600">You need to be logged in to access your wallet.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-fedex-purple">Wallet</h1>
-        <p className="text-gray-600">Kelola aset crypto Anda</p>
-      </div>
-
-      {/* Wallet Address */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="card bg-base-100 shadow-lg mb-6"
-      >
-        <div className="card-body">
-          <h3 className="card-title text-fedex-purple">Alamat Wallet</h3>
-          <div className="flex flex-col md:flex-row gap-4 mt-4">
-            <input 
-              type="text" 
-              className="input input-bordered flex-1 text-base" 
-              value="0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c" 
-              readOnly 
-            />
-            <button 
-              onClick={copyWalletAddress}
-              className="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none"
-            >
-              <FaCopy className="mr-2" />
-              Copy
-            </button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Smart Wallet</h1>
+          <p className="text-gray-600">Manage your BNB Mainnet smart wallet</p>
         </div>
-      </motion.div>
 
-      {/* Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {mockWalletBalances.map((balance, index) => {
-          const IconComponent = balance.icon === 'bitcoin' ? FaBitcoin : FaDollarSign;
-          const gradientClass = balance.color === 'yellow' 
-            ? 'from-yellow-400 to-yellow-500' 
-            : 'from-green-500 to-green-600';
-          const textColor = balance.color === 'yellow' ? 'text-yellow-200' : 'text-green-200';
-          
-          return (
-            <motion.div
-              key={balance.asset}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-              className={`card bg-gradient-to-r ${gradientClass} text-white shadow-lg`}
-            >
-              <div className="card-body">
+        {/* Wallet Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Wallet Info */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Wallet Status</h2>
+            
+            {walletLoading ? (
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span className="text-gray-600">Creating smart wallet...</span>
+              </div>
+            ) : walletError ? (
+              <div className="text-red-600 bg-red-50 p-3 rounded-lg">
+                Error: {walletError}
+              </div>
+            ) : account ? (
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className={`text-lg font-bold ${textColor}`}>
-                      {balance.asset} Balance
-                    </h3>
-                    <div className="text-3xl font-bold">
-                      {balance.asset === 'BNB' ? `${balance.balance} BNB` : `${balance.balance.toLocaleString()} USDT`}
-                    </div>
-                    {balance.usdValue && (
-                      <div className={textColor}>≈ ${balance.usdValue.toLocaleString()} USD</div>
-                    )}
-                    {balance.asset === 'USDT' && (
-                      <div className={textColor}>Stablecoin</div>
-                    )}
-                  </div>
-                  <div className={`text-4xl ${textColor}`}>
-                    <IconComponent />
+                  <span className="text-gray-600">Status:</span>
+                  <span className="text-green-600 font-semibold">Connected</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Address:</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-mono text-sm">{formatAddress(address || '')}</span>
+                    <button
+                      onClick={copyAddress}
+                      className="p-1 hover:bg-gray-100 rounded"
+                    >
+                      {copied ? <FiCheck className="text-green-600" /> : <FiCopy />}
+                    </button>
                   </div>
                 </div>
               </div>
-            </motion.div>
-          );
-        })}
-      </div>
+            ) : (
+              <div className="text-gray-600">Wallet not initialized</div>
+            )}
+          </div>
 
-      {/* Send/Receive Buttons */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
-      >
-        <button 
-          onClick={() => setShowSendModal(true)}
-          className="btn btn-lg bg-fedex-purple hover:bg-fedex-dark text-white border-none"
-        >
-          <FaPaperPlane className="mr-2" />
-          Kirim
-        </button>
-        <button 
-          onClick={() => setShowReceiveModal(true)}
-          className="btn btn-lg btn-outline btn-primary"
-        >
-          <FaDownload className="mr-2" />
-          Terima
-        </button>
-      </motion.div>
-
-      {/* Transaction History */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="card bg-base-100 shadow-lg"
-      >
-        <div className="card-body">
-          <h3 className="card-title text-fedex-purple">Histori Transaksi</h3>
-          <div className="overflow-x-auto mt-4">
-            <table className="table table-zebra w-full">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Asset</th>
-                  <th>Amount</th>
-                  <th>From/To</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockTransactions.map((transaction, index) => (
-                  <motion.tr
-                    key={transaction.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.7 + index * 0.1 }}
-                  >
-                    <td>
-                      <span className={`badge ${getBadgeClass(transaction.type)}`}>
-                        {getBadgeText(transaction.type)}
-                      </span>
-                    </td>
-                    <td>{transaction.asset}</td>
-                    <td className={`font-bold ${getAmountColor(transaction.type)}`}>
-                      {getAmountPrefix(transaction.type)}{transaction.amount}
-                    </td>
-                    <td>{transaction.from || transaction.to}</td>
-                    <td>{transaction.date}</td>
-                    <td>
-                      <span className="badge badge-success">Confirmed</span>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Quick Actions */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setShowSendModal(true)}
+                disabled={!account || walletLoading}
+                className="flex items-center justify-center space-x-2 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <FiSend />
+                <span>Send</span>
+              </button>
+              <button
+                onClick={() => setShowReceiveModal(true)}
+                disabled={!account || walletLoading}
+                className="flex items-center justify-center space-x-2 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <FiDownload />
+                <span>Receive</span>
+              </button>
+            </div>
           </div>
         </div>
-      </motion.div>
+
+        {/* Token Balances */}
+        {account && (
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Token Balances</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {tokens.map((token) => (
+                <div key={token.symbol} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold">{token.symbol}</span>
+                    <span className="text-sm text-gray-500">{token.name}</span>
+                  </div>
+                  <div className="text-2xl font-bold text-gray-800">0.00</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Send Modal */}
       {showSendModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg text-fedex-purple">Kirim Crypto</h3>
-            <div className="py-4">
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">Pilih Asset</span>
-                </label>
-                <select className="select select-bordered w-full text-base">
-                  <option>USDT</option>
-                  <option>BNB</option>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-semibold mb-4">Send Token</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Token</label>
+                <select
+                  value={selectedToken}
+                  onChange={(e) => setSelectedToken(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {tokens.map((token) => (
+                    <option key={token.symbol} value={token.symbol}>
+                      {token.symbol} - {token.name}
+                    </option>
+                  ))}
                 </select>
               </div>
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">Alamat Tujuan</span>
-                </label>
-                <input type="text" className="input input-bordered w-full text-base" placeholder="0x..." />
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">To Address</label>
+                <input
+                  type="text"
+                  value={sendTo}
+                  onChange={(e) => setSendTo(e.target.value)}
+                  placeholder="0x..."
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">Jumlah</span>
-                </label>
-                <input type="number" className="input input-bordered w-full text-base" placeholder="0.00" />
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                <input
+                  type="number"
+                  value={sendAmount}
+                  onChange={(e) => setSendAmount(e.target.value)}
+                  placeholder="0.0"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
             </div>
-            <div className="modal-action">
-              <button className="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none">
-                Kirim
-              </button>
-              <button 
-                className="btn"
+            
+            <div className="flex space-x-3 mt-6">
+              <button
                 onClick={() => setShowSendModal(false)}
+                className="flex-1 py-3 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
               >
-                Batal
+                Cancel
+              </button>
+              <button
+                onClick={handleSend}
+                disabled={sending || !sendTo || !sendAmount}
+                className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sending ? 'Sending...' : 'Send'}
               </button>
             </div>
           </div>
@@ -230,39 +220,42 @@ export default function WalletPage() {
 
       {/* Receive Modal */}
       {showReceiveModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg text-fedex-purple">Terima Crypto</h3>
-            <div className="py-4 text-center">
-              <div className="w-48 h-48 bg-gray-200 mx-auto mb-4 flex items-center justify-center rounded-lg">
-                <FaQrcode className="text-6xl text-gray-400" />
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                Scan QR Code atau gunakan alamat wallet di bawah
-              </p>
-              <div className="bg-base-200 p-4 rounded-lg">
-                <div className="text-xs break-all">
-                  0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-semibold mb-4">Receive</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Your Address</label>
+                <div className="flex items-center space-x-2 p-3 border border-gray-300 rounded-lg bg-gray-50">
+                  <span className="font-mono text-sm flex-1">{address}</span>
+                  <button
+                    onClick={copyAddress}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    {copied ? <FiCheck className="text-green-600" /> : <FiCopy />}
+                  </button>
                 </div>
               </div>
+              
+                              <p className="text-sm text-gray-600">
+                  Share this address to receive tokens. Make sure you&apos;re on BNB Mainnet.
+                </p>
             </div>
-            <div className="modal-action">
-              <button 
-                onClick={copyWalletAddress}
-                className="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none"
-              >
-                Copy Address
-              </button>
-              <button 
-                className="btn"
+            
+            <div className="mt-6">
+              <button
                 onClick={() => setShowReceiveModal(false)}
+                className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Tutup
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
-}
+};
+
+export default WalletPage;

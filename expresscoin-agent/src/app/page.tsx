@@ -15,6 +15,7 @@ import HistoryPage from '@/components/pages/HistoryPage';
 import ReferralPage from '@/components/pages/ReferralPage';
 import WalletPage from '@/components/pages/WalletPage';
 
+
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState<PageType>('dashboard');
