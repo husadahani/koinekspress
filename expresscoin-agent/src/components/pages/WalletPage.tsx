@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { mockWalletBalances, mockTransactions } from '@/data/mockData';
 import { useAuth } from '@/hooks/useAuth';
 import { useSmartWallet } from '@/hooks/useSmartWallet';
+import { SmartWalletDebug } from '@/components/SmartWalletDebug';
 
 export default function WalletPage() {
   const [showSendModal, setShowSendModal] = useState(false);
@@ -66,6 +67,11 @@ export default function WalletPage() {
             </p>
           </div>
         </motion.div>
+      )}
+
+      {/* Debug Info - Only show in development */}
+      {process.env.NODE_ENV === 'development' && user && (
+        <SmartWalletDebug />
       )}
 
       {/* Wallet Address */}

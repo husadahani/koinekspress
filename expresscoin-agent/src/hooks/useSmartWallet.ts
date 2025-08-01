@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { createSmartAccount } from '../lib/alchemy';
 import { LocalAccountSigner } from '@alchemy/aa-core';
+import { privateKeyFromUid } from '../lib/privateKeyFromUid';
 
 interface SmartAccount {
   getAddress: () => Promise<string>;
@@ -12,7 +13,7 @@ interface SmartAccount {
     value: bigint;
     data?: string;
   }) => Promise<unknown>;
-  getBalance: () => Promise<bigint>;
+  getBalance?: () => Promise<bigint>;
 }
 
 export interface SmartWalletState {
@@ -23,7 +24,7 @@ export interface SmartWalletState {
 }
 
 export const useSmartWallet = () => {
-  const { user, getIdToken } = useAuth();
+  const { user } = useAuth();
   const [walletState, setWalletState] = useState<SmartWalletState>({
     account: null,
     loading: false,
@@ -39,17 +40,12 @@ export const useSmartWallet = () => {
     try {
       setWalletState(prev => ({ ...prev, loading: true, error: null }));
       
-      // Get Firebase ID token
-      const idToken = await getIdToken();
-      if (!idToken) {
-        throw new Error('Failed to get authentication token');
-      }
-
-      // Create a simple signer for demo purposes
-      // In production, you would use a proper JWT-based signer
-      const signer = LocalAccountSigner.privateKeyToAccountSigner(
-        ("0x" + "1".repeat(64)) as `0x${string}` // Demo private key - replace with proper JWT signer
-      );
+      // Generate private key from Firebase UID
+      const privateKey = privateKeyFromUid(user.uid);
+      console.log('Generated private key from UID:', user.uid);
+      
+      // Create signer from private key
+      const signer = LocalAccountSigner.privateKeyToAccountSigner(privateKey);
       
       // Create smart account
       const account = await createSmartAccount(signer);
@@ -109,8 +105,13 @@ export const useSmartWallet = () => {
     }
 
     try {
-      const balance = await walletState.account.getBalance();
-      return balance;
+      if (walletState.account.getBalance) {
+        const balance = await walletState.account.getBalance();
+        return balance;
+      } else {
+        // Fallback if getBalance is not available
+        return BigInt(0);
+      }
     } catch (error: unknown) {
       console.error('Error getting balance:', error);
       throw error;
