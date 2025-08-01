@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { FaBitcoin, FaDollarSign, FaPaperPlane, FaDownload, FaCopy, FaQrcode } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { mockWalletBalances, mockTransactions } from '@/data/mockData';
+import { SmartWalletCard } from '@/components/SmartWalletCard';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function WalletPage() {
   const [showSendModal, setShowSendModal] = useState(false);

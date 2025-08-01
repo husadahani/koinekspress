@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import { PageType } from '@/types';
 import { mockUser, mockStats } from '@/data/mockData';
 
+// Firebase Auth Components
+import { AuthButton } from '@/components/AuthButton';
+import { SmartWalletCard } from '@/components/SmartWalletCard';
+
 // Components
 import LoginScreen from '@/components/auth/LoginScreen';
 import Navbar from '@/components/layout/Navbar';
@@ -77,7 +81,39 @@ export default function Home() {
   };
 
   if (!isLoggedIn) {
-    return <LoginScreen onLogin={handleLogin} />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="card bg-white shadow-2xl">
+            <div className="card-body text-center">
+              <h1 className="text-3xl font-bold text-gray-800 mb-6">
+                ExpressCoin Agent
+              </h1>
+              <p className="text-gray-600 mb-8">
+                Sign in with Google to access your smart wallet and start trading
+              </p>
+              
+              <div className="space-y-4">
+                <AuthButton />
+                
+                <div className="divider">OR</div>
+                
+                <button 
+                  onClick={handleLogin}
+                  className="btn btn-outline btn-primary w-full"
+                >
+                  Continue with Demo
+                </button>
+              </div>
+              
+              <div className="mt-8">
+                <SmartWalletCard />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
