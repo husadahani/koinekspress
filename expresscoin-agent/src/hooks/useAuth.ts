@@ -39,8 +39,8 @@ export const useAuth = () => {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       const result = await signInWithPopup(auth, googleProvider);
       return result;
-    } catch (error: any) {
-      const errorMessage = error.message || 'Failed to sign in with Google';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google';
       setAuthState(prev => ({ 
         ...prev, 
         loading: false, 
@@ -54,8 +54,8 @@ export const useAuth = () => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       await firebaseSignOut(auth);
-    } catch (error: any) {
-      const errorMessage = error.message || 'Failed to sign out';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign out';
       setAuthState(prev => ({ 
         ...prev, 
         loading: false, 

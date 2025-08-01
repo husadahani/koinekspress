@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { FiLogIn, FiLogOut, FiUser } from 'react-icons/fi';
 
 export const AuthButton = () => {
-  const { user, loading, error, signInWithGoogle, signOut } = useAuth();
+  const { user, loading, signInWithGoogle, signOut } = useAuth();
 
   const handleSignIn = async () => {
     try {

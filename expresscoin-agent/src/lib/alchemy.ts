@@ -1,8 +1,6 @@
 import { Alchemy, Network } from 'alchemy-sdk';
 import { 
-  createLightAccount, 
-  createModularAccount,
-  getDefaultLightAccountFactoryAddress 
+  createLightAccountAlchemyProvider
 } from '@alchemy/aa-alchemy';
 import { 
   createWalletClient, 
@@ -41,7 +39,7 @@ export const publicClient = createPublicClient({
 });
 
 // Wallet client configuration
-export const createWalletClientConfig = (account: any) => {
+export const createWalletClientConfig = (account: unknown) => {
   return createWalletClient({
     account,
     chain: bnbChain,
@@ -52,22 +50,19 @@ export const createWalletClientConfig = (account: any) => {
 // Gas Manager Policy ID (replace with your actual policy ID)
 export const GAS_MANAGER_POLICY_ID = process.env.NEXT_PUBLIC_GAS_MANAGER_POLICY_ID || "your-gas-manager-policy-id";
 
-// Light Account Factory Address for BNB MAINNET
-export const LIGHT_ACCOUNT_FACTORY_ADDRESS = getDefaultLightAccountFactoryAddress(bnbChain);
-
 // Smart Account creation helper
-export const createSmartAccount = async (signer: any) => {
+export const createSmartAccount = async (signer: unknown) => {
   try {
-    const account = await createLightAccount({
+    const provider = createLightAccountAlchemyProvider({
+      apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || '',
       chain: bnbChain,
       signer,
-      factoryAddress: LIGHT_ACCOUNT_FACTORY_ADDRESS,
       gasManagerConfig: {
         policyId: GAS_MANAGER_POLICY_ID,
       },
     });
     
-    return account;
+    return provider;
   } catch (error) {
     console.error('Error creating smart account:', error);
     throw error;
@@ -75,9 +70,10 @@ export const createSmartAccount = async (signer: any) => {
 };
 
 // Modular Account creation helper (alternative)
-export const createModularSmartAccount = async (signer: any) => {
+export const createModularSmartAccount = async (signer: unknown) => {
   try {
-    const account = await createModularAccount({
+    const provider = createLightAccountAlchemyProvider({
+      apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || '',
       chain: bnbChain,
       signer,
       gasManagerConfig: {
@@ -85,7 +81,7 @@ export const createModularSmartAccount = async (signer: any) => {
       },
     });
     
-    return account;
+    return provider;
   } catch (error) {
     console.error('Error creating modular smart account:', error);
     throw error;

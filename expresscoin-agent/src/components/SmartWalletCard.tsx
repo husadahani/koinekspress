@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useSmartWallet } from '../hooks/useSmartWallet';
-import { FiWallet, FiSend, FiRefreshCw, FiCopy } from 'react-icons/fi';
+import { FiCreditCard, FiSend, FiRefreshCw, FiCopy } from 'react-icons/fi';
 
 export const SmartWalletCard = () => {
   const { account, loading, error, address, sendTransaction, getBalance } = useSmartWallet();
@@ -66,7 +66,7 @@ export const SmartWalletCard = () => {
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="card-title text-error">
-            <FiWallet className="w-6 h-6" />
+            <FiCreditCard className="w-6 h-6" />
             Smart Wallet Error
           </h2>
           <p className="text-error">{error}</p>
@@ -80,7 +80,7 @@ export const SmartWalletCard = () => {
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">
-            <FiWallet className="w-6 h-6" />
+            <FiCreditCard className="w-6 h-6" />
             Smart Wallet
           </h2>
           <p>Please sign in to create your smart wallet</p>
@@ -93,7 +93,7 @@ export const SmartWalletCard = () => {
     <div className="card bg-base-100 shadow-xl">
       <div className="card-body">
         <h2 className="card-title">
-          <FiWallet className="w-6 h-6" />
+          <FiCreditCard className="w-6 h-6" />
           Smart Wallet
         </h2>
         
