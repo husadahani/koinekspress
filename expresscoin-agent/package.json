@@ -9,10 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@alchemy/aa-core": "^2.11.0",
-    "@alchemy/aa-ethers": "^2.11.0",
-    "@alchemy/aa-alchemy": "^2.11.0",
-    "@alchemy/aa-signers": "^2.11.0",
+    "@alchemy/aa-core": "^2.0.0",
+    "@alchemy/aa-ethers": "^2.0.0",
+    "@alchemy/aa-alchemy": "^2.0.0",
+    "@alchemy/aa-signers": "^2.0.0",
     "@next/font": "^14.2.15",
     "alchemy-sdk": "^2.8.0",
     "autoprefixer": "^10.4.21",

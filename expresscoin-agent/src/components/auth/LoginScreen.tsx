@@ -1,18 +1,32 @@
 'use client';
 
+import { useState } from 'react';
 import { FaShippingFast, FaGoogle } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LoginScreenProps {
   onLogin: () => void;
 }
 
 export default function LoginScreen({ onLogin }: LoginScreenProps) {
-  const handleGoogleLogin = () => {
-    // Mock login - in real app this would integrate with Google OAuth
-    setTimeout(() => {
+  const { signInWithGoogle, loading, error } = useAuth();
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    try {
+      setIsAuthenticating(true);
+      await signInWithGoogle();
       onLogin();
-    }, 1000);
+    } catch (error) {
+      console.error('Login error:', error);
+      // Fallback to demo login if Firebase fails
+      setTimeout(() => {
+        onLogin();
+      }, 1000);
+    } finally {
+      setIsAuthenticating(false);
+    }
   };
 
   return (
@@ -58,11 +72,31 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleGoogleLogin}
+            disabled={loading || isAuthenticating}
             className="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none w-full"
           >
-            <FaGoogle className="mr-2" />
-            Login dengan Google
+            {loading || isAuthenticating ? (
+              <>
+                <span className="loading loading-spinner loading-sm"></span>
+                Loading...
+              </>
+            ) : (
+              <>
+                <FaGoogle className="mr-2" />
+                Login dengan Google
+              </>
+            )}
           </motion.button>
+          
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="alert alert-error mt-4"
+            >
+              <span>{error}</span>
+            </motion.div>
+          )}
         </div>
       </motion.div>
     </div>

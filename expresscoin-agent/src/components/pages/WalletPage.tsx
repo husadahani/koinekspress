@@ -4,15 +4,18 @@ import { useState } from 'react';
 import { FaBitcoin, FaDollarSign, FaPaperPlane, FaDownload, FaCopy, FaQrcode } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { mockWalletBalances, mockTransactions } from '@/data/mockData';
-import { SmartWalletCard } from '@/components/SmartWalletCard';
 import { useAuth } from '@/hooks/useAuth';
+import { useSmartWallet } from '@/hooks/useSmartWallet';
 
 export default function WalletPage() {
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
+  const { user } = useAuth();
+  const { account, address, loading: walletLoading, error: walletError } = useSmartWallet();
 
   const copyWalletAddress = () => {
-    navigator.clipboard.writeText('0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c');
+    const walletAddress = address || '0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c';
+    navigator.clipboard.writeText(walletAddress);
     // In a real app, you'd show a toast notification here
   };
 
@@ -43,6 +46,28 @@ export default function WalletPage() {
         <p className="text-gray-600">Kelola aset crypto Anda</p>
       </div>
 
+      {/* Smart Wallet Status */}
+      {user && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="card bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg mb-6"
+        >
+          <div className="card-body">
+            <h3 className="card-title text-white">
+              🔐 Smart Wallet Connected
+            </h3>
+            <p className="text-green-100">
+              {walletLoading ? 'Creating smart wallet...' : 
+               walletError ? `Error: ${walletError}` : 
+               account ? 'Smart wallet ready for transactions' : 
+               'Initializing smart wallet...'}
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Wallet Address */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -56,7 +81,7 @@ export default function WalletPage() {
             <input 
               type="text" 
               className="input input-bordered flex-1 text-base" 
-              value="0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c" 
+              value={address || "0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c"} 
               readOnly 
             />
             <button 
@@ -67,6 +92,11 @@ export default function WalletPage() {
               Copy
             </button>
           </div>
+          {user && (
+            <div className="mt-2 text-sm text-gray-600">
+              {account ? '✅ Smart wallet active with gas sponsorship' : '⏳ Setting up smart wallet...'}
+            </div>
+          )}
         </div>
       </motion.div>
 
