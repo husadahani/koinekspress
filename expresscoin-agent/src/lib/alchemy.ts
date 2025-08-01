@@ -4,7 +4,8 @@ import {
 import { 
   createWalletClient, 
   http, 
-  createPublicClient 
+  createPublicClient,
+  type Account
 } from 'viem';
 import { bsc } from 'viem/chains';
 
@@ -31,7 +32,7 @@ export const publicClient = createPublicClient({
 });
 
 // Wallet client configuration
-export const createWalletClientConfig = (account: unknown) => {
+export const createWalletClientConfig = (account: `0x${string}` | Account | undefined) => {
   return createWalletClient({
     account,
     chain: bnbChain,
@@ -56,10 +57,7 @@ export const createSmartAccount = async (uid: string) => {
     const provider = createLightAccountAlchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || '',
       chain: bnbChain,
-      signer,
-      gasManagerConfig: {
-        policyId: GAS_MANAGER_POLICY_ID,
-      },
+      owner: signer,
     });
     
     return provider;

@@ -92,6 +92,51 @@ export const useSmartWallet = () => {
     }
   };
 
+  const sendToken = async (to: string, amount: string, tokenSymbol: string = 'BNB') => {
+    if (!walletState.account) {
+      throw new Error('Smart wallet not initialized');
+    }
+
+    try {
+      setWalletState(prev => ({ ...prev, loading: true, error: null }));
+
+      if (tokenSymbol.toUpperCase() === 'BNB') {
+        // Send native BNB
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await (walletState.account as any).sendUserOperation({
+          target: to as `0x${string}`,
+          data: '0x' as `0x${string}`,
+          value: BigInt(amount),
+        });
+        return result;
+      } else {
+        // Send ERC20 token
+        const { encodeERC20Transfer, getTokenAddress } = await import('../lib/tokenUtils');
+        const tokenAddress = getTokenAddress(tokenSymbol);
+        const transferData = encodeERC20Transfer(to, amount);
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await (walletState.account as any).sendUserOperation({
+          target: tokenAddress as `0x${string}`,
+          data: transferData,
+          value: BigInt(0), // No value for ERC20 transfer
+        });
+        return result;
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send token';
+      setWalletState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+        backgroundInitializing: false,
+      }));
+      throw error;
+    } finally {
+      setWalletState(prev => ({ ...prev, loading: false }));
+    }
+  };
+
   const getBalance = async () => {
     if (!walletState.account) {
       throw new Error('Smart wallet not initialized');
@@ -163,6 +208,7 @@ export const useSmartWallet = () => {
     ...walletState,
     createWallet,
     sendTransaction,
+    sendToken,
     getBalance,
   };
 };

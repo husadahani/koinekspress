@@ -32,9 +32,10 @@ export const TOKEN_ADDRESSES = {
   USDC: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", // BNB Mainnet USDC
 } as const;
 
+import { encodeFunctionData } from 'viem';
+
 // Encode ERC20 transfer data
 export function encodeERC20Transfer(to: string, amount: string): `0x${string}` {
-  const { encodeFunctionData } = require('viem');
   return encodeFunctionData({
     abi: ERC20_TRANSFER_ABI,
     functionName: 'transfer',
