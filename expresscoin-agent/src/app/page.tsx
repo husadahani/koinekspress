@@ -14,7 +14,7 @@ import PackagesPage from '@/components/pages/PackagesPage';
 import HistoryPage from '@/components/pages/HistoryPage';
 import ReferralPage from '@/components/pages/ReferralPage';
 import WalletPage from '@/components/pages/WalletPage';
-import { BackgroundInitStatus } from '@/components/BackgroundInitStatus';
+
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -84,9 +84,6 @@ export default function Home() {
   return (
     <div>
       <Navbar onMobileMenuToggle={handleMobileMenuToggle} />
-      
-      {/* Background Initialization Status */}
-      <BackgroundInitStatus />
       
       <div className="drawer lg:drawer-open">
         <input 

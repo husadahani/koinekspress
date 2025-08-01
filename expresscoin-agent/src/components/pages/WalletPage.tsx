@@ -6,13 +6,16 @@ import { motion } from 'framer-motion';
 import { mockWalletBalances, mockTransactions } from '@/data/mockData';
 import { useAuth } from '@/hooks/useAuth';
 import { useSmartWallet } from '@/hooks/useSmartWallet';
-import { SmartWalletDebug } from '@/components/SmartWalletDebug';
 
 export default function WalletPage() {
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
+  const [sendRecipient, setSendRecipient] = useState('');
+  const [sendAmount, setSendAmount] = useState('');
+  const [sendAsset, setSendAsset] = useState('BNB');
+  const [sendLoading, setSendLoading] = useState(false);
   const { user } = useAuth();
-  const { account, address, loading: walletLoading, error: walletError } = useSmartWallet();
+  const { account, address, loading: walletLoading, error: walletError, sendTransaction } = useSmartWallet();
 
   const copyWalletAddress = () => {
     const walletAddress = address || '0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c';
@@ -34,6 +37,27 @@ export default function WalletPage() {
 
   const getAmountPrefix = (type: string) => {
     return type === 'receive' ? '+' : '-';
+  };
+
+  const handleSendToken = async () => {
+    if (!sendRecipient || !sendAmount) {
+      alert('Please enter recipient address and amount');
+      return;
+    }
+
+    try {
+      setSendLoading(true);
+      await sendTransaction(sendRecipient, sendAmount);
+      alert('Transaction sent successfully!');
+      setSendRecipient('');
+      setSendAmount('');
+      setShowSendModal(false);
+    } catch (error) {
+      console.error('Send transaction error:', error);
+      alert('Transaction failed. Please try again.');
+    } finally {
+      setSendLoading(false);
+    }
   };
 
   return (
@@ -69,10 +93,7 @@ export default function WalletPage() {
         </motion.div>
       )}
 
-      {/* Debug Info - Only show in development */}
-      {process.env.NODE_ENV === 'development' && user && (
-        <SmartWalletDebug />
-      )}
+
 
       {/* Wallet Address */}
       <motion.div
@@ -158,17 +179,19 @@ export default function WalletPage() {
       >
         <button 
           onClick={() => setShowSendModal(true)}
-          className="btn btn-lg bg-fedex-purple hover:bg-fedex-dark text-white border-none"
+          disabled={!account || walletLoading}
+          className="btn btn-lg bg-fedex-purple hover:bg-fedex-dark text-white border-none disabled:opacity-50"
         >
           <FaPaperPlane className="mr-2" />
-          Kirim
+          {walletLoading ? 'Loading...' : 'Kirim Token'}
         </button>
         <button 
           onClick={() => setShowReceiveModal(true)}
-          className="btn btn-lg btn-outline btn-primary"
+          disabled={!address}
+          className="btn btn-lg btn-outline btn-primary disabled:opacity-50"
         >
           <FaDownload className="mr-2" />
-          Terima
+          Terima Token
         </button>
       </motion.div>
 
@@ -227,37 +250,65 @@ export default function WalletPage() {
       {showSendModal && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg text-fedex-purple">Kirim Crypto</h3>
+            <h3 className="font-bold text-lg text-fedex-purple">Kirim Token</h3>
             <div className="py-4">
               <div className="form-control mb-4">
                 <label className="label">
                   <span className="label-text">Pilih Asset</span>
                 </label>
-                <select className="select select-bordered w-full text-base">
-                  <option>USDT</option>
-                  <option>BNB</option>
+                <select 
+                  className="select select-bordered w-full text-base"
+                  value={sendAsset}
+                  onChange={(e) => setSendAsset(e.target.value)}
+                >
+                  <option value="BNB">BNB</option>
+                  <option value="USDT">USDT</option>
                 </select>
               </div>
               <div className="form-control mb-4">
                 <label className="label">
                   <span className="label-text">Alamat Tujuan</span>
                 </label>
-                <input type="text" className="input input-bordered w-full text-base" placeholder="0x..." />
+                <input 
+                  type="text" 
+                  className="input input-bordered w-full text-base" 
+                  placeholder="0x..." 
+                  value={sendRecipient}
+                  onChange={(e) => setSendRecipient(e.target.value)}
+                />
               </div>
               <div className="form-control mb-4">
                 <label className="label">
                   <span className="label-text">Jumlah</span>
                 </label>
-                <input type="number" className="input input-bordered w-full text-base" placeholder="0.00" />
+                <input 
+                  type="number" 
+                  className="input input-bordered w-full text-base" 
+                  placeholder="0.00" 
+                  value={sendAmount}
+                  onChange={(e) => setSendAmount(e.target.value)}
+                />
               </div>
             </div>
             <div className="modal-action">
-              <button className="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none">
-                Kirim
+              <button 
+                className="btn btn-primary bg-fedex-purple hover:bg-fedex-dark border-none"
+                onClick={handleSendToken}
+                disabled={sendLoading || !sendRecipient || !sendAmount}
+              >
+                {sendLoading ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm"></span>
+                    Sending...
+                  </>
+                ) : (
+                  'Kirim'
+                )}
               </button>
               <button 
                 className="btn"
                 onClick={() => setShowSendModal(false)}
+                disabled={sendLoading}
               >
                 Batal
               </button>
@@ -270,7 +321,7 @@ export default function WalletPage() {
       {showReceiveModal && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg text-fedex-purple">Terima Crypto</h3>
+            <h3 className="font-bold text-lg text-fedex-purple">Terima Token</h3>
             <div className="py-4 text-center">
               <div className="w-48 h-48 bg-gray-200 mx-auto mb-4 flex items-center justify-center rounded-lg">
                 <FaQrcode className="text-6xl text-gray-400" />
@@ -280,7 +331,7 @@ export default function WalletPage() {
               </p>
               <div className="bg-base-200 p-4 rounded-lg">
                 <div className="text-xs break-all">
-                  0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c
+                  {address || '0x742d35Cc6634C0532925a3b8D0A91A1D4bF5b53c'}
                 </div>
               </div>
             </div>
